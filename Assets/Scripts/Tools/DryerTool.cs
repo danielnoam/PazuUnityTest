@@ -18,12 +18,16 @@ namespace UnityPazuTest.Tools
 
         public override float GetIndicatorRotation(Vector2 localMousePosition)
         {
+            var lookDir = localMousePosition.x > 0 ? 90 : -90;
+            
             Vector2 screenCenter = Vector2.zero;
             Vector2 directionToCenter = screenCenter - localMousePosition;
             float targetAngle = Mathf.Atan2(directionToCenter.y, directionToCenter.x) * Mathf.Rad2Deg;
             _currentRotation = Mathf.LerpAngle(_currentRotation, targetAngle, rotationSpeed * Time.deltaTime);
+
             return _currentRotation;
         }
+        
 
         public override Sprite GetIndicatorSprite()
         {

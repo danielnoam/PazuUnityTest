@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c3722874009402f98c4f2fee48e2fc7, type: 3}
   m_Name: Grower
   m_EditorClassIdentifier: 
-  indicatorOffset: {x: 0, y: -60}
   sprite: {fileID: 21300000, guid: afe10e028c394a04882a0b4b93ad14fe, type: 3}
-  shakeIntensity: 0.5
+  indicatorOffset: {x: 0, y: -60}
   shakeSpeed: 35
+  shakeIntensity: 2
   growerDistanceThreshold: 0.5
   growerAmount: 0.02

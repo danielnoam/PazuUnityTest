@@ -27,6 +27,11 @@ namespace UnityPazuTest.Tools
                 Destroy(gameObject);
                 return;
             }
+
+            if (Application.isMobilePlatform)
+            {
+                Application.targetFrameRate = 120;
+            }
             
             Instance = this;
             _mainCamera = Camera.main;
