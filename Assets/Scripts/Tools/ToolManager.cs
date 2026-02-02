@@ -1,28 +1,24 @@
 ﻿using System;
+using TMPro;
 using UnityEngine;
-using UnityPazuTest.Tool;
+using UnityPazuTest.Character;
 
-namespace UnityPazuTest
+namespace UnityPazuTest.Tools
 {
     public class ToolManager : MonoBehaviour
     {
         public static ToolManager Instance { get; private set; }
+        public static event Action<ToolSO> OnToolSelected;
+        public static event Action<ToolSO> OnToolReleased;
         
-        public static event Action<ToolType> OnToolSelected;
-        public static event Action<ToolType> OnToolReleased;
-        public static event Action<ToolType, Vector2> OnToolUsing;
+        [Header("Debug")]
+        [SerializeField] private TextMeshProUGUI debugText;
 
-        [SerializeField] private ToolType currentTool = ToolType.None;
-        [SerializeField] private float dryerBlowRadius = 2f;
-        [SerializeField] private float dryerBlowStrength = 5f;
-        [SerializeField] private float scissorsCutRadius = 0.5f;
-        [SerializeField] private float growerRadius = 2f;
-        [SerializeField] private float growerAmount = 0.1f;
-
-        public ToolType CurrentTool => currentTool;
-
+        private HairPatch[] _allHairs;
+        private ToolSO _currentTool;
         private Camera _mainCamera;
         private bool _isMouseHeld;
+
 
         private void Awake()
         {
@@ -36,6 +32,11 @@ namespace UnityPazuTest
             _mainCamera = Camera.main;
         }
 
+        private void Start()
+        {
+            _allHairs = FindObjectsOfType<HairPatch>();
+        }
+
         private void Update()
         {
             if (Input.GetMouseButtonDown(0))
@@ -43,58 +44,37 @@ namespace UnityPazuTest
                 _isMouseHeld = true;
             }
 
-            if (Input.GetMouseButton(0) && _isMouseHeld && currentTool != ToolType.None)
+            if (Input.GetMouseButton(0) && _isMouseHeld && _currentTool)
             {
                 Vector3 mouseWorldPos = _mainCamera.ScreenToWorldPoint(Input.mousePosition);
                 Vector2 position = new Vector2(mouseWorldPos.x, mouseWorldPos.y);
-                UseTool(position);
+                _currentTool.Use(position, _allHairs);
             }
 
             if (Input.GetMouseButtonUp(0))
             {
                 _isMouseHeld = false;
-                OnToolReleased?.Invoke(currentTool);
-                currentTool = ToolType.None;
+                _currentTool?.Released();
+                OnToolReleased?.Invoke(_currentTool);
+                _currentTool = null;
             }
-        }
 
-        public void SelectTool(ToolType tool)
-        {
-            currentTool = tool;
-            OnToolSelected?.Invoke(tool);
-        }
-
-        private void UseTool(Vector2 position)
-        {
-            switch (currentTool)
+            if (debugText)
             {
-                case ToolType.Dryer:
-                    UseDryer(position);
-                    break;
-                case ToolType.Scissors:
-                    UseScissors(position);
-                    break;
-                case ToolType.Grower:
-                    UseGrower(position);
-                    break;
+                var text = "";
+                text += $"FPS: {Mathf.RoundToInt(1 / Time.smoothDeltaTime)}\n";
+                text += $"Hairs: {_allHairs.Length}";
+                debugText.text = text;
             }
-            
-            OnToolUsing?.Invoke(currentTool, position);
         }
 
-        private void UseDryer(Vector2 position)
+        public void SelectTool(ToolSO tool)
         {
-            
-        }
+            if (!tool) return;
 
-        private void UseScissors(Vector2 position)
-        {
-            
-        }
-
-        private void UseGrower(Vector2 position)
-        {
-            
+            _currentTool = tool;
+            _currentTool.Selected();
+            OnToolSelected?.Invoke(_currentTool);
         }
     }
 }

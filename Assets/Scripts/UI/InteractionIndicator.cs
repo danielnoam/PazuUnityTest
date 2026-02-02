@@ -1,21 +1,16 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-using UnityPazuTest.Tool;
+using UnityPazuTest.Tools;
 
 namespace UnityPazuTest.UI
 {
     public class InteractionIndicator : MonoBehaviour
     {
-        [SerializeField, Min(1)] private float followSpeed = 20f;
-        [SerializeField] private Vector3 offset = Vector3.zero;
         [SerializeField] private Image image;
-        
-        [SerializeField] private Sprite dryerSprite;
-        [SerializeField] private Sprite scissorsSprite;
-        [SerializeField] private Sprite growerSprite;
 
         private RectTransform _rectTransform;
         private Canvas _canvas;
+        private ToolSO _currentTool;
 
         private void Awake()
         {
@@ -37,11 +32,30 @@ namespace UnityPazuTest.UI
 
         private void Update()
         {
-            FollowMouse();
+            if (!_currentTool || !image.enabled) return;
+
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                _canvas.transform as RectTransform,
+                Input.mousePosition,
+                _canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : _canvas.worldCamera,
+                out var localPoint
+            );
+            
+            _rectTransform.localPosition = localPoint + _currentTool.GetIndicatorPositionOffset(localPoint);
+            _rectTransform.localEulerAngles = new Vector3(0, 0, _currentTool.GetIndicatorRotation(localPoint));
+            image.sprite = _currentTool.GetIndicatorSprite();
         }
 
-        private void OnToolSelected(ToolType toolType)
+        private void OnToolSelected(ToolSO tool)
         {
+            _currentTool = tool;
+
+            if (!tool)
+            {
+                image.enabled = false;
+                return;
+            }
+
             RectTransformUtility.ScreenPointToLocalPointInRectangle(
                 _canvas.transform as RectTransform,
                 Input.mousePosition,
@@ -49,52 +63,17 @@ namespace UnityPazuTest.UI
                 out var localPoint
             );
 
-            Vector3 targetPosition = localPoint + (Vector2)offset;
-            _rectTransform.localPosition = targetPosition;
+            _rectTransform.localPosition = localPoint + tool.GetIndicatorPositionOffset(localPoint);
+            _rectTransform.localEulerAngles = new Vector3(0, 0, tool.GetIndicatorRotation(localPoint));
             
-            
-            switch (toolType)
-            {
-                case ToolType.Dryer:
-                    image.sprite = dryerSprite;
-                    image.enabled = true;
-                    break;
-
-                case ToolType.Scissors:
-                    image.sprite = scissorsSprite;
-                    image.enabled = true;
-                    break;
-
-                case ToolType.Grower:
-                    image.sprite = growerSprite;
-                    image.enabled = true;
-                    break;
-
-                case ToolType.None:
-                    image.enabled = false;
-                    break;
-            }
+            image.sprite = tool.GetIndicatorSprite();
+            image.enabled = true;
         }
 
-        private void OnToolReleased(ToolType toolType)
+        private void OnToolReleased(ToolSO tool)
         {
             image.enabled = false;
-        }
-
-        private void FollowMouse()
-        {
-            if (!image.enabled) return;
-            
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                _canvas.transform as RectTransform,
-                Input.mousePosition,
-                _canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : _canvas.worldCamera,
-                out var localPoint
-            );
-
-            Vector3 targetPosition = localPoint + (Vector2)offset;
-
-            _rectTransform.localPosition = Vector3.Lerp(_rectTransform.localPosition, targetPosition, followSpeed * Time.deltaTime);
+            _currentTool = null;
         }
     }
 }

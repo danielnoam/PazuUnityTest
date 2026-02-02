@@ -1,14 +1,13 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using UnityPazuTest.Tool;
+using UnityPazuTest.Tools;
 
 namespace UnityPazuTest.UI
 {
     public class ToolButton : MonoBehaviour, IPointerDownHandler
     {
-        [SerializeField] private ToolType toolType;
+        [SerializeField] private ToolSO tool;
         private Image _image;
 
         private void Awake()
@@ -28,28 +27,28 @@ namespace UnityPazuTest.UI
             ToolManager.OnToolReleased -= OnToolReleased;
         }
 
-
-        private void OnToolSelected(ToolType toolType)
+        private void OnToolSelected(ToolSO selectedTool)
         {
-            if (toolType == this.toolType)
+            if (selectedTool == tool)
             {
                 _image.enabled = false;
             }
         }
         
-        private void OnToolReleased(ToolType toolType)
+        private void OnToolReleased(ToolSO selectedTool)
         {
-            if (toolType == this.toolType)
+            if (selectedTool == tool)
             {
                 _image.enabled = true;
             }
+
         }
 
         public void OnPointerDown(PointerEventData eventData)
         {
-            if (ToolManager.Instance)
+            if (ToolManager.Instance && tool)
             {
-                ToolManager.Instance.SelectTool(toolType);
+                ToolManager.Instance.SelectTool(tool);
             }
         }
     }
