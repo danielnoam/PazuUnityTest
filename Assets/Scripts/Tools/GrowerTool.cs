@@ -1,16 +1,18 @@
 ﻿using UnityEngine;
+using UnityPazuTest.Character;
 
 namespace UnityPazuTest.Tools
 {
     [CreateAssetMenu(fileName = "Grower", menuName = "Tools/Grower Tool")]
     public class GrowerTool : ToolSO
     {
+        [Header("Settings")]
         [SerializeField] private Sprite sprite;
         [SerializeField] private Vector2 indicatorOffset = Vector2.zero;
         [SerializeField] private float shakeSpeed = 35f;
-        [SerializeField] private float shakeIntensity = 0.5f;
-        [SerializeField] private float growerDistanceThreshold = 0.5f;
-        [SerializeField] private float growerAmount = 0.02f;
+        [SerializeField] private float shakeIntensity = 2f;
+        [SerializeField] private float growthRadius = 0.5f;
+        [SerializeField] private float growthRate = 0.02f;
 
         public override Vector2 GetIndicatorPositionOffset(Vector2 localMousePosition)
         {
@@ -19,30 +21,22 @@ namespace UnityPazuTest.Tools
             return indicatorOffset + new Vector2(shakeX, shakeY);
         }
 
-        public override float GetIndicatorRotation(Vector2 localMousePosition)
+        public override Vector3 GetIndicatorRotation(Vector2 localMousePosition)
         {
-            return 0f;
+            return Vector3.zero;
         }
 
-        public override Sprite GetIndicatorSprite()
+        public override Sprite GetCurrentSprite()
         {
             return sprite;
         }
 
-        public override void Use(Vector2 position, Character.HairPatch[] hairs)
+        public override void Use(Vector2 position, HairPatch[] hairs)
         {
             foreach (var hair in hairs)
             {
-                hair.TryGrow(position, growerDistanceThreshold, growerAmount);
+                hair.TryGrow(position, growthRadius, growthRate);
             }
-        }
-
-        public override void Selected()
-        {
-        }
-
-        public override void Released()
-        {
         }
     }
 }

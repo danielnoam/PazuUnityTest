@@ -7,10 +7,10 @@ namespace UnityPazuTest.Character
     public class HairPatch : MonoBehaviour
     {
         [Header("Settings")]
-        [SerializeField] private float lengthChangeInterval = 0.1f;
-        [SerializeField] private float blowFlipInterval = 0.1f;
+        [SerializeField] private float lengthChangeInterval = 0.02f;
+        [SerializeField] private float spriteFlipInterval = 0.05f;
         [SerializeField, Min(0)] private float minLength;
-        [SerializeField, Min(1)] private float maxLength = 10;
+        [SerializeField, Min(1)] private float maxLength = 2.75f;
         [SerializeField, Min(0)] private float currentLength = 3;
 
         [Header("References")]
@@ -23,6 +23,9 @@ namespace UnityPazuTest.Character
         
         private Vector2 HairRoot => hairPivot.position;
         private Vector2 HairTip => HairRoot + (Vector2)(hairPivot.right * currentLength);
+
+        
+        private const float NearZeroThreshold = 0.01f;
         
         
         private void OnValidate()
@@ -38,7 +41,6 @@ namespace UnityPazuTest.Character
         private void Awake()
         {
             _startRotation = hairPivot.localEulerAngles;
-            hairSprite.flipY = Random.Range(0, 2) == 0;
             SetLength(currentLength);
         }
 
@@ -59,7 +61,6 @@ namespace UnityPazuTest.Character
         private void SetLength(float length)
         {
             currentLength = Mathf.Clamp(length, minLength, maxLength);
-            if (currentLength < 0.05f) currentLength = minLength;
             hairSprite.transform.localScale = new Vector2(currentLength, hairSprite.transform.localScale.y);
         }
         
@@ -72,14 +73,20 @@ namespace UnityPazuTest.Character
         {
             Vector2 line = HairTip - HairRoot;
             float lineLength = line.magnitude;
-            Vector2 lineDirection = line / lineLength;
+            
 
+            if (lineLength < NearZeroThreshold)
+            {
+                return Vector2.Distance(point, HairRoot);
+            }
+    
+            Vector2 lineDirection = line / lineLength;
             Vector2 toPoint = point - HairRoot;
             float projection = Vector2.Dot(toPoint, lineDirection);
-            
+    
             projection = Mathf.Clamp(projection, 0, lineLength);
-
             Vector2 closestPoint = HairRoot + lineDirection * projection;
+    
             return Vector2.Distance(point, closestPoint);
         }
         
@@ -103,17 +110,18 @@ namespace UnityPazuTest.Character
             {
                 float newLength = Mathf.Clamp(projection, minLength, maxLength);
                 SetLength(newLength);
+                _lengthChangeCooldown = lengthChangeInterval;
             }
         }
 
-        public void TryGrow(Vector2 growerPosition, float distanceThreshold, float growAmount)
+        public void TryGrow(Vector2 position, float radius, float amount)
         {
             if (_lengthChangeCooldown > 0) return;
 
-            float distanceToHair = DistanceToHairLine(growerPosition);
-            if (distanceToHair <= distanceThreshold)
+            float distanceToHair = DistanceToHairLine(position);
+            if (distanceToHair <= radius)
             {
-                SetLength(currentLength + growAmount);
+                SetLength(currentLength + amount);
                 _lengthChangeCooldown = lengthChangeInterval;
             }
         }
@@ -127,7 +135,7 @@ namespace UnityPazuTest.Character
             if (_spriteFlipCooldown <= 0)
             {
                 hairSprite.flipY = !hairSprite.flipY;
-                _spriteFlipCooldown = blowFlipInterval + Random.Range(0f, blowFlipInterval); 
+                _spriteFlipCooldown = spriteFlipInterval + Random.Range(0f, spriteFlipInterval); 
             }
         }
 

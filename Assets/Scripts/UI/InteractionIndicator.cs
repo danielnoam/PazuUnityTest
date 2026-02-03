@@ -6,11 +6,13 @@ namespace UnityPazuTest.UI
 {
     public class InteractionIndicator : MonoBehaviour
     {
+        [Header("References")]
         [SerializeField] private Image image;
 
         private RectTransform _rectTransform;
         private Canvas _canvas;
         private ToolSO _currentTool;
+        
 
         private void Awake()
         {
@@ -42,19 +44,16 @@ namespace UnityPazuTest.UI
             );
             
             _rectTransform.localPosition = localPoint + _currentTool.GetIndicatorPositionOffset(localPoint);
-            _rectTransform.localEulerAngles = new Vector3(0, 0, _currentTool.GetIndicatorRotation(localPoint));
-            image.sprite = _currentTool.GetIndicatorSprite();
+            _rectTransform.localEulerAngles = _currentTool.GetIndicatorRotation(localPoint);
+            _currentTool.UpdateTool(Time.deltaTime);
+            image.sprite = _currentTool.GetCurrentSprite();
         }
 
         private void OnToolSelected(ToolSO tool)
         {
+            if (!tool)  return;
+            
             _currentTool = tool;
-
-            if (!tool)
-            {
-                image.enabled = false;
-                return;
-            }
 
             RectTransformUtility.ScreenPointToLocalPointInRectangle(
                 _canvas.transform as RectTransform,
@@ -64,9 +63,9 @@ namespace UnityPazuTest.UI
             );
 
             _rectTransform.localPosition = localPoint + tool.GetIndicatorPositionOffset(localPoint);
-            _rectTransform.localEulerAngles = new Vector3(0, 0, tool.GetIndicatorRotation(localPoint));
+            _rectTransform.localEulerAngles = _currentTool.GetIndicatorRotation(localPoint);
             
-            image.sprite = tool.GetIndicatorSprite();
+            image.sprite = tool.GetCurrentSprite();
             image.enabled = true;
         }
 

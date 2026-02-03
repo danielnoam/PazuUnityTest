@@ -1,17 +1,20 @@
 ﻿using UnityEngine;
+using UnityPazuTest.Character;
 
 namespace UnityPazuTest.Tools
 {
     [CreateAssetMenu(fileName = "Scissors", menuName = "Tools/Scissors Tool")]
     public class ScissorsTool : ToolSO
     {
+        [Header("Settings")]
         [SerializeField] private Sprite[] animationFrames;
         [SerializeField] private float animationSpeed = 6f;
         [SerializeField] private Vector2 indicatorOffset = Vector2.zero;
-        [SerializeField] private float cutDistanceThreshold = 0.01f;
+        [SerializeField] private float cutDistanceThreshold = 0.02f;
         
         private float _animationTimer;
         private int _currentFrame;
+
 
         public override Vector2 GetIndicatorPositionOffset(Vector2 localMousePosition)
         {
@@ -19,27 +22,18 @@ namespace UnityPazuTest.Tools
             return new Vector2(indicatorOffset.x * xMultiplier, indicatorOffset.y);
         }
 
-        public override float GetIndicatorRotation(Vector2 localMousePosition)
+        public override Vector3 GetIndicatorRotation(Vector2 localMousePosition)
         {
-            return localMousePosition.x > 0 ? 90 : -90;
+            return new Vector3(0, 0 ,localMousePosition.x > 0 ? 90 : -90);
         }
 
-        public override Sprite GetIndicatorSprite()
+        public override Sprite GetCurrentSprite()
         {
-            if (animationFrames == null || animationFrames.Length == 0)
-                return null;
-
-            _animationTimer += Time.deltaTime;
-            if (_animationTimer >= 1f / animationSpeed)
-            {
-                _animationTimer = 0;
-                _currentFrame = (_currentFrame + 1) % animationFrames.Length;
-            }
-            
+            if (animationFrames == null || animationFrames.Length == 0) return null;
             return animationFrames[_currentFrame];
         }
 
-        public override void Use(Vector2 position, Character.HairPatch[] hairs)
+        public override void Use(Vector2 position, HairPatch[] hairs)
         {
             foreach (var hair in hairs)
             {
@@ -47,14 +41,21 @@ namespace UnityPazuTest.Tools
             }
         }
 
-        public override void Selected()
+        public override void UpdateTool(float deltaTime)
         {
-            _currentFrame = 0;
-            _animationTimer = 0;
+            if (animationFrames is not { Length: > 1 }) return;
+
+            _animationTimer += deltaTime;
+            if (_animationTimer >= 1f / animationSpeed)
+            {
+                _animationTimer = 0f;
+                _currentFrame = (_currentFrame + 1) % animationFrames.Length;
+            }
         }
 
-        public override void Released()
+        public override void Selected()
         {
+            _animationTimer = 0f;
             _currentFrame = 0;
         }
     }
