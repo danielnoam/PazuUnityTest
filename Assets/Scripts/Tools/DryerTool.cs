@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using UnityPazuTest.Character;
 
 namespace UnityPazuTest.Tools
@@ -10,6 +11,7 @@ namespace UnityPazuTest.Tools
         [SerializeField] private Sprite sprite;
         [SerializeField] private float spriteRotationOffset = -40;
         [SerializeField] private float tiltSensitivity = 0.05f;
+        [SerializeField] private float flipCooldown = 0.2f;
 
 
         public override Vector2 GetIndicatorPositionOffset(Vector2 localMousePosition)
@@ -31,11 +33,11 @@ namespace UnityPazuTest.Tools
             return sprite;
         }
 
-        public override void Use(Vector2 position, HairPatch[] hairs)
+        public override void Use(Vector2 from, Vector2 to, List<HairPatch> hairPatches)
         {
-            foreach (var hair in hairs)
+            foreach (var patch in hairPatches)
             {
-                hair.Blow(position);
+                patch.Blow(to, flipCooldown);
             }
         }
         

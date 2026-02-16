@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using UnityPazuTest.Character;
 
 namespace UnityPazuTest.Tools
@@ -33,11 +34,11 @@ namespace UnityPazuTest.Tools
             return animationFrames[_currentFrame];
         }
 
-        public override void Use(Vector2 position, HairPatch[] hairs)
+        public override void Use(Vector2 from, Vector2 to, List<HairPatch> hairPatches)
         {
-            foreach (var hair in hairs)
+            foreach (var patch in hairPatches)
             {
-                hair.TryCut(position, cutDistanceThreshold);
+                patch.TryCut(from, to, cutDistanceThreshold);
             }
         }
 

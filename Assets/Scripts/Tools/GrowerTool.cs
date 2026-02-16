@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using UnityPazuTest.Character;
 
 namespace UnityPazuTest.Tools
@@ -31,11 +32,11 @@ namespace UnityPazuTest.Tools
             return sprite;
         }
 
-        public override void Use(Vector2 position, HairPatch[] hairs)
+        public override void Use(Vector2 from, Vector2 to, List<HairPatch> hairPatches)
         {
-            foreach (var hair in hairs)
+            foreach (var patch in hairPatches)
             {
-                hair.TryGrow(position, growthRadius, growthRate);
+                patch.TryGrow(to, growthRadius, growthRate);
             }
         }
     }

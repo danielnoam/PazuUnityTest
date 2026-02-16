@@ -13,4 +13,6 @@ MonoBehaviour:
   m_Name: Dryer
   m_EditorClassIdentifier: 
   sprite: {fileID: 21300000, guid: 2dde902b9a31beb47be1a6d911ddfde0, type: 3}
-  rotationOffset: -40
+  spriteRotationOffset: -40
+  tiltSensitivity: 0.05
+  flipCooldown: 0.1
